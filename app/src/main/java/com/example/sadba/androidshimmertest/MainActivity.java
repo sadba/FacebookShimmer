@@ -1,5 +1,6 @@
 package com.example.sadba.androidshimmertest;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,11 +28,13 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
     ShimmerLayout shimmerLayout;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh);
 
         //Init Api
         Retrofit retrofit = RetrofitClient.getInstance();
@@ -43,7 +46,21 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         //fetchData
-        fetchData();
+
+
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                fetchData();
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchData();
+            }
+        });
     }
 
     private void fetchData() {
@@ -70,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         shimmerLayout.stopShimmerAnimation();
         shimmerLayout.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
